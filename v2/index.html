@@ -18,7 +18,7 @@
             <button id="button_logout" style="display: none">Logout</button>
         </nav>
         <nav id="nav_cat"></nav>
-        <div id="loader" style="display: none"><img src="loader.gif" alt=""></div>
+        <div id="loader" style="display: none"><img src="loader.gif" alt="" style="width: 250px"></div>
         <div id="root"></div>
     </div>
 
@@ -54,64 +54,74 @@
             console.log('BEGIN NAV CATEGORIES')
 
             fetch(api + '/api/categories')
+
             .then (response => {
                 return response.json()
             })
+
             .then (data => {
                 console.log('Data = ' , data)
                 let categories = data['hydra:member']
                 return categories.map(function (category) {
                     let a = createNode('a')
                     append(nav_cat, a)
+                    a.classList.add('btn')
+                    a.classList.add('btn-pimary')
                     a.innerHTML = `${category.name}`
                     a.href = api + `/api/categories/${category.id}`
-                    a.classList.add('btn','btn-primary','m-1')
+                    a.addEventListener("click", function (event) {
 
-                    a.addEventListener('click', function (event) {
-                        loader.style.display = 'block'
                         event.preventDefault()
+
+                        loader.style.display = 'block'
+
                         fetch(a.href)
                         .then (response => {
                             return response.json()
                         })
                         .then (data => {
-                            console.log('Data = ' , data)
+                            console.log('Category = ' , data)
                             root.innerHTML = ''
-                            h2 = createNode('h2')
+                            let h2 = createNode('h2')
                             append(root, h2)
-                            h2.innerHTML = `Catégorie = ${category.name}`
-                            data.posts.map(function (post) {
+                            h2.innerHTML = `Catégorie : ${data.name}`
+
+                            return data.posts.map(function (post) {
                                 console.log('Post = ' , post)
-                                
+
                                 fetch(api + post)
                                 .then (response => {
                                     return response.json()
                                 })
-                                .then (post => {
-                                    console.log('Post = ' , post)
+                                .then (data => {
+                                    console.log('Post = ' , data)
+
                                     let h3 = createNode('h3')
                                     append(root, h3)
-                                    h3.innerHTML = `${post.title}`
+                                    h3.innerHTML = `${data.title}`
+
                                     let div = createNode('div')
                                     append(root, div)
-                                    div.innerHTML = `${post.createdAt}`
+                                    div.innerHTML = `${data.createdAt}`
+
                                     let img = createNode('img')
                                     append(root, img)
-                                    img.src = `${post.image}`
+                                    img.src = `${data.image}`
+
                                     div = createNode('div')
                                     append(root, div)
-                                    div.innerHTML = `${post.content}`
-
+                                    div.innerHTML = `${data.content.substring(0,1000)} ...`
                                 })
+
+                                loader.style.display = 'none'
                             })
-                            loader.style.display = 'none'
-                        })
+                        })                        
                     })
                 })
                 
             })
 
-            console.log('END NAV CATEGORIES')            
+            console.log('END CATEGORIES')            
 
 
             document.getElementById("button_posts").addEventListener("click", function () {
@@ -153,7 +163,7 @@
 
                         div = createNode('div')
                         append(root, div)
-                        div.innerHTML = `${post.content.substring(0, 1000)}...`
+                        div.innerHTML = `${post.content}`
 
                         loader.style.display = 'none'
                     })
